@@ -40,9 +40,7 @@ Este projeto tem como objetivo fixar os conhecimentos adquiridos sobre Docker e 
    - Testar a criação da VPC, a configuração do RDS, e a comunicação entre os serviços.
    - Validar a distribuição de tráfego via Load Balancer e a conectividade com o banco de dados no RDS.
 
----
-
-## Detalhes das Tarefas
+## Etapas realizadas 
 
 ### 1. Script
 Comecei com essa etapa para entender como funcionaria a execução do WordPress em um contêiner Docker. Realizei testes locais para consolidar melhor o processo. O objetivo do script é configurar a instância com o Docker instalado e, em seguida, iniciar automaticamente a aplicação WordPress. Para garantir que tudo estivesse funcionando corretamente, realizei testes no meu sistema Linux, utilizando o WSL. O teste foi bem-sucedido e, após isso, retirei a imagem do MariaDB do script, pois ela não será utilizada no projeto.
@@ -110,38 +108,32 @@ Configuração da Instância:
 
 
 ### 3. **Criação da VPC e Configuração de Rede**
-   - Criar uma VPC (Virtual Private Cloud) na AWS.
-   - Configurar sub-redes públicas e privadas.
-   - Criar um grupo de segurança para controlar o acesso à instância e ao banco de dados.
+   .
 
 ** EM CRIAÇÃO **
 
 ### 4. **Criação do RDS (Banco de Dados)**
-   - Criar uma instância do RDS utilizando o MySQL.
-   - Configurar o RDS para ser acessível a partir das instâncias do WordPress.
-   - Definir as credenciais de acesso e as configurações necessárias para o banco de dados.
+
 
 ** EM CRIAÇÃO **
 
 ### 5. **Deploy de Aplicação Wordpress**
-   - Deploy do Wordpress em container.
-   - Utilização do **RDS** para banco de dados MySQL.
+
 
 ** EM CRIAÇÃO **
 
 ### 6. **Configuração do EFS (Elastic File System)**
-   - Configurar o EFS para armazenar arquivos estáticos do Wordpress.
+
 
 ** EM CRIAÇÃO **
 
 ### 7. **Configuração do Load Balancer (AWS)**
-   - Configurar o Load Balancer Classic para distribuir o tráfego da aplicação Wordpress.
+  
 
 ** EM CRIAÇÃO **
 
 ### 8. **Testes e Validação**
-   - Testar a criação da VPC, a configuração do RDS, e a comunicação entre os serviços.
-   - Validar a distribuição de tráfego via Load Balancer e a conectividade com o banco de dados no RDS.
+
 
 ** EM CRIAÇÃO **
 
