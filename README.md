@@ -21,29 +21,13 @@ Abaixo está a estrutura do projeto a partir de uma imagem:
 
 ## Índice das Tarefas 
 
-1. [Script](#1-script)
- 
-
-2. [Criação da VPC e Configuração de Rede](#3-criação-da-vpc-e-configuração-de-rede)
-
-
-3. [Criação do RDS (Banco de Dados)](#4-criação-do-rds-banco-de-dados)
-
-
-4. [Configuração da Instância EC2](#2-configuração-da-instância-ec2)
-
-
-5. [Deploy da Aplicação WordPress](#5-deploy-da-aplicação-wordpress)
-
-
-6. [Configuração do EFS (Elastic File System)](#6-configuração-do-efs-elastic-file-system)
-
-
-7. [Configuração do Load Balancer (AWS)](#7-configuração-do-load-balancer-aws)
- 
-
-8. [Testes e Validação](#8-testes-e-validação)
-
+1. **Teste local com script**
+2. **Criação da VPC e Configuração de Rede**
+3. **Criação do RDS (Banco de Dados)**
+4. **Configuração do EFS (Elastic File System)**
+5. **Configuração da Instância EC2**
+6. **Configuração do Load Balancer (AWS)**
+7. **Auto Scaling Group**
 ---
 
 # 1. Teste local com script #
@@ -164,6 +148,14 @@ Regras de Saída( inbound ):
 
 ---
 
+
+3. **Criação do RDS (Banco de Dados)**
+
+Para este projeto, Pesquisei RDS na barra de pesquisa, cliquei em "DB Instances" e, em seguida, em "Create database". Iniciei as configurações para criação, escolhi o MySQL conforme o projeto, associei o RDS à VPC criada e atribuí o respectivo grupo de segurança. Em Additional configuration, defini um nome para o banco de dados e finalizei a criação, utilizando a classe db.t3.micro.
+
+![Minha Imagem](./img/rds.png)
+---
+
 # Configuração do EFS (Elastic File System) #
  Foi utilizado o efs nesse projeto O EFS que é um sistema de arquivos escalável e totalmente gerenciado para uso com serviços da AWS e instâncias EC2. Ele permite a criação de um sistema de arquivos compartilhado, acessível por várias instâncias EC2 simultaneamente, oferecendo alta disponibilidade e escalabilidade automática.
 
@@ -172,13 +164,6 @@ Regras de Saída( inbound ):
 Para anexar o EFS, aperte Attach que ira abrir essas configurações, para a motnagem na instancia foi  escolhido a opção NFS Client
 
 ![Minha Imagem](./img/efs-attach.png)
-
-# Criação do RDS #
-
-Para este projeto, Pesquisei RDS na barra de pesquisa, cliquei em "DB Instances" e, em seguida, em "Create database". Iniciei as configurações para criação, escolhi o MySQL conforme o projeto, associei o RDS à VPC criada e atribuí o respectivo grupo de segurança. Em Additional configuration, defini um nome para o banco de dados e finalizei a criação, utilizando a classe db.t3.micro.
-
-![Minha Imagem](./img/rds.png)
----
 # Configuração da Instância EC2 #
 
 A instância EC2 é um dos serviços fundamentais do projeot da AWS e será utilizado para hospedar o WordPress atráves do user_data.sh, que constitui a base principal deste projeto. Para configurar a instância que irá rodar o WordPress, o primeiro passo é acessar o painel do EC2 e clicar em Launch Instances.
