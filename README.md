@@ -116,7 +116,7 @@ Como a arquitetura solicitada exige a criação de sub-redes públicas e privada
 
 
 # Configuração de Grupos de Segurança para Instâncias EC2, Load Balancer e RDS
-Para a criação dos grupos de segurança, pesquise "Security Groups" na barra de pesquisa da AWS e clique em Create Security Group. Associe a VPC criada e atribui os nomes aos grupos conforme as configurações abaixo:
+Para a criação dos grupos de segurança, pesquisei "Security Groups" na barra de pesquisa da AWS e clique em Create Security Group. Associe a VPC criada e atribui os nomes aos grupos conforme as configurações abaixo:
 
 **Grupo de Segurança: ec2-security-group**
 
@@ -159,6 +159,10 @@ Para este projeto, Pesquisei RDS na barra de pesquisa, cliquei em "DB Instances"
 # Configuração do EFS (Elastic File System) #
  Foi utilizado o efs nesse projeto O EFS que é um sistema de arquivos escalável e totalmente gerenciado para uso com serviços da AWS e instâncias EC2. Ele permite a criação de um sistema de arquivos compartilhado, acessível por várias instâncias EC2 simultaneamente, oferecendo alta disponibilidade e escalabilidade automática.
 
+ Na barra de pesquisa procurei por EFS e cliquei Create file system. 
+  - Atribui um nome 
+  - Adicionei a VPC do projeto.
+
 ![Minha Imagem](./img/efs.png)
 
 Para anexar o EFS, aperte Attach que ira abrir essas configurações, para a motnagem na instancia foi  escolhido a opção NFS Client
@@ -166,7 +170,7 @@ Para anexar o EFS, aperte Attach que ira abrir essas configurações, para a mot
 ![Minha Imagem](./img/efs-attach.png)
 # Configuração da Instância EC2 #
 
-A instância EC2 é um dos serviços fundamentais do projeot da AWS e será utilizado para hospedar o WordPress atráves do user_data.sh, que constitui a base principal deste projeto. Para configurar a instância que irá rodar o WordPress, o primeiro passo é acessar o painel do EC2 e clicar em Launch Instances.
+A instância EC2 é um dos serviços fundamentais do projeto da AWS e será utilizada para hospedar o WordPress atráves do user_data.sh, que constitui a base principal deste projeto. Para configurar a instância que irá rodar o WordPress, o primeiro passo é acessar o painel do EC2 e clicar em Launch Instances.
 
 **Configuração da Instância:**
 
