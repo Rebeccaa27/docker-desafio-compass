@@ -335,4 +335,6 @@ Clique em "Próximo" até chegar à página final para **criar o Auto Scaling Gr
 
 Após configurar o Auto Scaling Group, aguarde alguns minutos até que as instâncias EC2 sejam criadas e fiquem 100% prontas. Esse processo pode levar algum tempo.
 
-Após esse período, acesse o **Load Balancer** novamente e verifique as instâncias que foram adicionadas automaticamente pelo Auto Scaling Group.
+Após esse período, acessei o **Load Balancer** novamente e verifiquei as instâncias que foram adicionadas automaticamente pelo Auto Scaling Group.
+
+![Minha Imagem]()
