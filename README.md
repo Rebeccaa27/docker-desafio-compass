@@ -120,6 +120,9 @@ Adicionei uma rota com o destino **0.0.0.0/0**, apontando para o **NAT Gateway**
 
 
 # 3. Configuração de Grupos de Segurança para Instâncias EC2, Load Balancer e RDS
+
+
+
 Para a criação dos grupos de segurança, pesquisei "Security Groups" na barra de pesquisa da AWS e clique em Create Security Group. Associe a VPC criada e atribui os nomes aos grupos conforme as configurações abaixo:
 
 
@@ -167,7 +170,7 @@ Para a criação dos grupos de segurança, pesquisei "Security Groups" na barra 
 - **Tipo**: Todos os tipos de tráfego | **Porta**: Todos | **Destino**: `0.0.0.0/0`  
   Permite que o banco de dados RDS envie tráfego para qualquer destino na internet.
 
-
+---
 
 **O que são Grupos de Segurança e para que servem?**
 
@@ -175,8 +178,6 @@ Grupos de segurança são uma camada de segurança virtual que controla o tráfe
 Esses grupos são usados para proteger as instâncias de máquinas virtuais (EC2), balanceadores de carga (ELB) e bancos de dados (RDS) de acessos não autorizados, permitindo um controle mais granular do tráfego de rede.
 
 ![Minha Imagem](./img/grupo.png)
-
----
 
 
 # 4 **Criação do RDS (Banco de Dados)**
@@ -313,6 +314,9 @@ docker compose -f /projeto/docker-compose.yml up
 # 7. **Configuração do Load Balancer (AWS)**
 
 Com a aplicação WordPress em funcionamento e devidamente integrada ao RDS e EFS, o próximo passo é configurar um Load Balancer para assegurar alta disponibilidade e balanceamento de carga. Para atender a essas necessidades, foi escolhido o Classic Load Balancer para o projeto.
+
+![Minha Imagem](./img/load.png)
+
 Segue abaixo as configurações da criação:
 
 ### 1. **Acessar o Console de Load Balancers**
