@@ -125,65 +125,47 @@ Para a criação dos grupos de segurança, pesquisei "Security Groups" na barra 
 
 ## Grupo de Segurança: ec2-security-group 💻
 
-| Serviço        | Porta | Protocolo | Origem                         |
-|----------------|-------|-----------|--------------------------------|
-| EC2            | 80    | HTTP      | `lb-security-group`            |
-| EC2            | 443   | HTTPS     | `lb-security-group`            |
-| EC2            | 22    | SSH       | `0.0.0.0/0` (ou IP confiável) |
-| RDS MySQL      | 3306  | MySQL     | `rds-security-group`           |
-| EFS            | 2049  | NFS       | `ec2-security-group`           |
-
 ### Regras de Entrada (Outbound):
 
-| Tipo             | Porta | Origem                       |
-|------------------|-------|------------------------------|
-| HTTP             | 80    | `lb-security-group`          |
-
+- **Tipo**: HTTP | **Porta**: 80 | **Origem**: `lb-security-group` (Grupo de Segurança do Load Balancer)  
+  Permite que o tráfego HTTP seja direcionado para as instâncias EC2 a partir do Load Balancer.
+  
 ### Regras de Saída (Inbound):
 
-| Tipo             | Porta | Destino                      |
-|------------------|-------|------------------------------|
-| MySQL/Aurora     | 3306  | `rds-security-group`         |
-| Todos os tipos   | Todos | `0.0.0.0/0`                  |
+- **Tipo**: MySQL/Aurora | **Porta**: 3306 | **Origem**: `rds-security-group` (Grupo de Segurança do RDS)  
+  Permite que as instâncias EC2 se comuniquem com o banco de dados RDS, utilizando a porta padrão do MySQL/Aurora.
+
+- **Tipo**: Todos os tipos de tráfego | **Porta**: Todos | **Destino**: `0.0.0.0/0`  
+  Permite que as instâncias EC2 se comuniquem com qualquer destino na internet.
 
 ---
 
 ## Grupo de Segurança do Load Balancer: lb-security-group 🛠️
 
-| Serviço        | Porta | Protocolo | Origem       |
-|----------------|-------|-----------|--------------|
-| Load Balancer  | 80    | HTTP      | `0.0.0.0/0`  |
-
 ### Regras de Entrada (Outbound):
 
-| Tipo             | Porta | Origem       |
-|------------------|-------|--------------|
-| HTTP             | 80    | `0.0.0.0/0`  |
+- **Tipo**: HTTP | **Porta**: 80 | **Origem**: `0.0.0.0/0`  
+  Permite que o tráfego HTTP de qualquer origem seja direcionado para o Load Balancer. Usado para acessar sua aplicação publicamente via HTTP.
+
 
 ### Regras de Saída (Inbound):
 
-| Tipo             | Porta | Destino              |
-|------------------|-------|----------------------|
-| HTTP             | 80    | `ec2-security-group` |
+- **Tipo**: HTTP | **Porta**: 80 | **Destino**: `ec2-security-group` (Grupo de Segurança das Instâncias EC2)  
+  O Load Balancer pode se comunicar com as instâncias EC2 através de tráfego HTTP na porta 80 para direcionar as requisições para as instâncias apropriadas.
+
 ---
 
 ## Grupo de Segurança RDS: rds-security-group 💾
 
-| Serviço        | Porta | Protocolo | Origem               |
-|----------------|-------|-----------|----------------------|
-| RDS MySQL      | 3306  | MySQL     | `ec2-security-group` |
-
 ### Regras de Entrada (Outbound):
 
-| Tipo             | Porta | Origem                 |
-|------------------|-------|------------------------|
-| MySQL/Aurora     | 3306  | `ec2-security-group`   |
+- **Tipo**: MySQL/Aurora | **Porta**: 3306 | **Origem**: `ec2-security-group` (Grupo de Segurança das Instâncias EC2)  
+  Permite que o banco de dados RDS receba tráfego proveniente das instâncias EC2 para comunicação com o banco de dados.
 
 ### Regras de Saída (Inbound):
 
-| Tipo             | Porta | Destino                |
-|------------------|-------|------------------------|
-| Todos os tipos   | Todos | `0.0.0.0/0`            |
+- **Tipo**: Todos os tipos de tráfego | **Porta**: Todos | **Destino**: `0.0.0.0/0`  
+  Permite que o banco de dados RDS envie tráfego para qualquer destino na internet.
 
 
 
