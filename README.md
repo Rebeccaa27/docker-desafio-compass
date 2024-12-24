@@ -149,14 +149,14 @@ Regras de Saída( inbound ):
 ---
 
 
-3. **Criação do RDS (Banco de Dados)**
+# 3. **Criação do RDS (Banco de Dados)**
 
 Para este projeto, Pesquisei RDS na barra de pesquisa, cliquei em "DB Instances" e, em seguida, em "Create database". Iniciei as configurações para criação, escolhi o MySQL conforme o projeto, associei o RDS à VPC criada e atribuí o respectivo grupo de segurança. Em Additional configuration, defini um nome para o banco de dados e finalizei a criação, utilizando a classe db.t3.micro.
 
 ![Minha Imagem](./img/rds.png)
 ---
 
-# Configuração do EFS (Elastic File System) #
+# 4. **Configuração do EFS (Elastic File System)**
  Foi utilizado o efs nesse projeto O EFS que é um sistema de arquivos escalável e totalmente gerenciado para uso com serviços da AWS e instâncias EC2. Ele permite a criação de um sistema de arquivos compartilhado, acessível por várias instâncias EC2 simultaneamente, oferecendo alta disponibilidade e escalabilidade automática.
 
  Na barra de pesquisa procurei por EFS e cliquei Create file system. 
@@ -168,7 +168,7 @@ Para este projeto, Pesquisei RDS na barra de pesquisa, cliquei em "DB Instances"
 Para anexar o EFS, aperte Attach que ira abrir essas configurações, para a motnagem na instancia foi  escolhido a opção NFS Client
 
 ![Minha Imagem](./img/efs-attach.png)
-# Configuração da Instância EC2 #
+# 5. **Configuração da Instância EC2**
 
 A instância EC2 é um dos serviços fundamentais do projeto da AWS e será utilizada para hospedar o WordPress atráves do user_data.sh, que constitui a base principal deste projeto. Para configurar a instância que irá rodar o WordPress, o primeiro passo é acessar o painel do EC2 e clicar em Launch Instances.
 
@@ -252,7 +252,7 @@ docker compose -f /projeto/docker-compose.yml up
 
 O script já inclui explicações detalhadas sobre o que cada comando faz, facilitando o entendimento e a execução das etapas.
 
-# Configuração do Load Balancer #
+# 6. **Configuração do Load Balancer (AWS)**
 
 Com a aplicação WordPress em funcionamento e devidamente integrada ao RDS e EFS, o próximo passo é configurar um Load Balancer para assegurar alta disponibilidade e balanceamento de carga. Para atender a essas necessidades, foi escolhido o Classic Load Balancer para o projeto.
 Segue abaixo as configurações da criação:
@@ -300,8 +300,7 @@ Segue abaixo as configurações da criação:
 
 ![Minha Imagem](./img/laodbalancer.png)
 
-# Configuração do Auto Scaling Group #
-
+# 7. **Auto Scaling Group**
 Após a configuração do Load Balancer, o próximo passo é associá-lo a um Auto Scaling Group para garantir escalabilidade automática da aplicação.
 
 as etapas para criar e configurar o Auto Scaling Group, que garantirá a escalabilidade automática da aplicação WordPress.
@@ -342,3 +341,16 @@ Após configurar o Auto Scaling Group, aguarde alguns minutos até que as instâ
 Após esse período, acessei o **Load Balancer** novamente e verifiquei as instâncias que foram adicionadas automaticamente pelo Auto Scaling Group.
 
 ![Minha Imagem]()
+
+## Bônus: Configuração do Bastion Host
+
+Se desejar acessar as instâncias criadas de forma segura, você pode configurar um **Bastion Host**. O Bastion Host funciona como uma ponte para acessar suas instâncias privadas em uma VPC. 
+
+### Passos para Configurar o Bastion Host:
+1. Crie uma nova instância EC2 configurada com uma chave SSH e conecte-a à sub-rede pública da sua VPC.
+2. Atribua um **Elastic IP** ao Bastion Host para que ele tenha um endereço IP público fixo.
+3. Configure regras de segurança no **Security Group** do Bastion Host, permitindo acesso SSH (porta 22) apenas do seu endereço IP.
+4. No **Security Group** das instâncias privadas, permita acesso SSH apenas a partir do Bastion Host.
+5. Conecte-se ao Bastion Host via SSH e, de lá, acesse as instâncias privadas.
+
+Essa configuração aumenta a segurança, pois reduz o acesso direto às instâncias EC2 privadas, permitindo acesso apenas através do Bastion Host. Veja a imagem abaixo:
