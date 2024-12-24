@@ -241,8 +241,7 @@ A instância EC2 é um dos serviços fundamentais do projeto da AWS e será util
   - No campo User Data, inseri o script desenvolvido para automatizar a instalação e configuração de um ambiente Docker na instância EC2: 
 
 ```bash
-#!/bin/bash
-
+#!/bin/bash 
 
 # Atualiza o repositório de pacotes do sistema e instala pacotes necessários para a instalação do Docker
 sudo apt-get update -y
@@ -264,29 +263,28 @@ echo \
 # Atualiza a lista de pacotes novamente
 sudo apt-get update -y
 
-# Instala a versão mais recente do Docker e suas dependências
+# Instala a versão mais recente do Docker 
 sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin nfs-common
 
-# Inicia o serviço Docker no sistema
+# Certifica que o Docker inicie automaticamente após o reinício
+sudo systemctl enable docker
+
+# Inicia o serviço do Docker
 sudo systemctl start docker
 
-# Adiciona o usuário 'ubuntu' ao grupo Docker para permitir o uso do Docker sem sudo
+# Adiciona o usuário ao grupo docker 
 sudo usermod -aG docker ubuntu
-
-# Atualiza o grupo para garantir que as permissões do Docker sejam aplicadas imediatamente
 newgrp docker
 
-# Instala o pacote necessário para trabalhar com sistemas de arquivos NFS
+# instala o nfs-common
 sudo apt install nfs-common -y
 
-# Cria o diretório onde o EFS será montado
+# cria diretórios necessários para a montagem
 sudo mkdir -p /mnt/efs
 
-# Monta o sistema de arquivos EFS (Elastic File System) na pasta /mnt/efs
-sudo mount -t nfs4 -o nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,noresvport <id-efs>.efs.us-east-1.amazonaws.com:/ /mnt/efs
+sudo mount -t nfs4 -o nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,noresvport fs-067b7b6f67dfe8d8d.efs.us-east-1.amazonaws.com:/ /mnt/efs 
 
-# Cria o diretório onde os dados do projeto serão armazenados
-sudo mkdir -p /projeto
+sudo mkdir -p /projeto  
 
 # Criação do arquivo docker-compose.yml
 cat <<EOF > /projeto/docker-compose.yml
@@ -297,17 +295,36 @@ services:
     ports:
       - 80:80
     environment:
-      WORDPRESS_DB_HOST: <endpoint>
-      WORDPRESS_DB_USER: <user>
-      WORDPRESS_DB_PASSWORD: <Senha>
-      WORDPRESS_DB_NAME: <nomebancodedados>
+      WORDPRESS_DB_HOST: projectwordpress-banco.clsai62gqnrn.us-east-1.rds.amazonaws.com
+      WORDPRESS_DB_USER: admin
+      WORDPRESS_DB_PASSWORD: Senha123456
+      WORDPRESS_DB_NAME: wordpressprojeto
     volumes:
       - /mnt/efs:/var/www/html
 EOF
-# Inicia o Docker Compose, usando o arquivo docker-compose.yml localizado no diretório /projeto, para subir os containers definidos no arquivo
-docker compose -f /projeto/docker-compose.yml up
+
+# Criação do serviço do Systemd para garantir que o container WordPress suba automaticamente
+cat <<EOF | sudo tee /etc/systemd/system/wordpress-container.service
+[Unit]
+Description=WordPress Docker Container
+After=docker.service
+Requires=docker.service
+
+[Service]
+ExecStart=/usr/bin/docker compose -f /projeto/docker-compose.yml up
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+sudo systemctl enable wordpress-container.service
+
+
+sudo systemctl start wordpress-container.service
 
 ```
+A criação do serviço do systemd no script é essencial para garantir que o container do WordPress seja iniciado automaticamente após reinicializações do sistema. Com isso, mesmo que a instância seja reiniciada, a aplicação continuará funcionando normalmente. O serviço assegura que o Docker esteja pronto antes de iniciar o container e garante que o WordPress seja reiniciado automaticamente em caso de falhas, mantendo a disponibilidade da aplicação sem a necessidade de intervenção manual.
+
 
 ### O script já inclui explicações detalhadas sobre o que cada comando faz, facilitando o entendimento e a execução das etapas. 📝
 
