@@ -402,8 +402,9 @@ Após esse período, acessei o **Load Balancer** novamente e verifiquei as inst�
 
 ![Minha Imagem](./img/integridade.png)
 # 9. Bônus: Configuração do Bastion Host
+**Se você precisar acessar instâncias privadas para realizar modificações ou solucionar problemas, pode configurar um Bastion Host.**
 
-Se desejar acessar as instâncias criadas de forma segura, você pode configurar um **Bastion Host**. O Bastion Host funciona como uma ponte para acessar suas instâncias privadas em uma VPC. 
+O Bastion Host é uma instância segura que funciona como uma porta de entrada para acessar instâncias dentro de uma VPC. Ele é utilizado para acessar instâncias privadas, que não estão diretamente expostas à internet, de forma controlada e segura. O Bastion Host fica acessível à internet e, a partir dele, que conseguimos nos conectar às instâncias privadas por meio de protocolos como SSH. 
 
 ### Passos para Configurar o Bastion Host
 
@@ -414,6 +415,7 @@ Se desejar acessar as instâncias criadas de forma segura, você pode configurar
    - Atribua um **Elastic IP** ao Bastion Host, garantindo um endereço IP público fixo.
 
 3. **Configuração de Regras de Segurança:**
+   - Recomendo criar um grupo de segurança a parte para ele, mas dentro da mesma VPC.
    - No **Security Group** do Bastion Host, permita o acesso SSH (porta 22) apenas a partir do seu endereço IP.
 
 4. **Configuração do Security Group da Instância Privada:**
