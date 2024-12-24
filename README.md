@@ -233,7 +233,7 @@ A instância EC2 é um dos serviços fundamentais do projeto da AWS e será util
 **Configuração da Instância:**
 
   - Acessei o Console da AWS e naveguei até a seção EC2.
-  - Iniciei a criação de uma nova instância, selecionando a imagem Amazon Linux 2023 (64-bit).
+  - Iniciei a criação de uma nova instância, selecionando a imagem Ubuntu 24.04LTS
   - Adicionei as tags necessárias.
   - Escolhi a instância t2.micro com 8 GiB de armazenamento em um volume.
   - Na seção "Detalhes Avançados", localizei a opção User data.
