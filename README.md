@@ -23,11 +23,14 @@ Abaixo está a estrutura do projeto a partir de uma imagem:
 
 1. **Teste local com script**
 2. **Criação da VPC e Configuração de Rede**
-3. **Criação do RDS (Banco de Dados)**
-4. **Configuração do EFS (Elastic File System)**
-5. **Configuração da Instância EC2**
-6. **Configuração do Load Balancer (AWS)**
-7. **Auto Scaling Group**
+3. **Configuração de Grupos de Segurança**
+4. **Criação do RDS (Banco de Dados)**
+5. **Configuração do EFS (Elastic File System)**
+6. **Configuração da Instância EC2**
+7. **Configuração do Load Balancer (AWS)**
+8. **Auto Scaling Group**
+9. **Bônus: Configuração do Bastion Host**
+
 ---
 
 # 1. Teste local com script #
@@ -68,39 +71,40 @@ Como a arquitetura solicitada exige a criação de sub-redes públicas e privada
 
 ## **Passo 1: Criar a VPC**
 
- Acesse o console da AWS e procure por **VPC** na barra de pesquisa.  
- Clique em **Create VPC** e preencha os seguintes campos:
-   - **Name Tag**: Insira um nome único para identificar sua VPC (exemplo: `ProjetoVPC`).
-   - **IPv4 CIDR block**: Defina o intervalo de IPs (exemplo: `10.0.0.0/16`)
+Acessei o console da AWS e procurei por **VPC** na barra de pesquisa.  
+Cliquei em **Create VPC** e preenchi os seguintes campos:  
+- **Name Tag**: ProjetoWordpress  
+- **IPv4 CIDR block**: Defini o intervalo de IPs como 10.0.0.0/16  
 
 ---
 
 ## **Passo 2: Configuração de Sub-redes**
 
- **Sub-redes Públicas**:
-   - Crie pelo menos duas sub-redes públicas dentro da VPC (exemplo: `10.0.0.0/24` e `10.0.1.0/24`).
+### **Sub-redes Públicas**:
+Criei duas sub-redes públicas para o tráfego de internet do **Load Balancer** e do **NAT Gateway**.  
 
- **Sub-redes Privadas**:
-   - Crie pelo menos duas sub-redes privadas dentro da VPC (exemplo: `10.0.2.0/24` e `10.0.3.0/24`).
+### **Sub-redes Privadas**:
+Criei duas sub-redes privadas para as instâncias **EC2** e o banco de dados.  
+
 ---
 
 ## **Passo 3: Configuração de Gateways e Tabelas de Rotas**
 
- **Criação do Internet Gateway (IGW)**:
-   - Vá até **Internet Gateways** e clique em **Create Internet Gateway**.
-   - Nomeie o IGW e conecte-o à VPC criada.
+### **Criação do Internet Gateway (IGW)**:
+Naveguei até **Internet Gateways** e cliquei em **Create Internet Gateway**.  
+Nomeei o IGW e o conectei à VPC que havia criado.  
 
- **Configuração de Rotas para Sub-redes Públicas**:
-   - Temos que criar uma **tabela de rotas pública** e associe-a às sub-redes públicas.
-   - Adicione uma rota com o destino **0.0.0.0/0**, apontando para o **Internet Gateway (IGW)**, permitindo que o **Load Balancer** nas sub-redes públicas acesse a internet.
+### **Configuração de Rotas para Sub-redes Públicas**:
+Criei uma **tabela de rotas pública** e associei-a às sub-redes públicas.  
+Adicionei uma rota com o destino **0.0.0.0/0**, apontando para o **Internet Gateway (IGW)**, permitindo que o **Load Balancer** nas sub-redes públicas acessasse a internet.  
 
- **Criação do NAT Gateway**:
-   - Vá até **NAT Gateways** e crie um NAT Gateway em uma das sub-redes públicas.
-   - Aloque um Elastic IP para o NAT Gateway.
+### **Criação do NAT Gateway**:
+Fui até **NAT Gateways** e criei um NAT Gateway em uma das sub-redes públicas.  
+Aloquei um Elastic IP para o NAT Gateway.  
 
- **Configuração de Rotas para Sub-redes Privadas**:
-   - Crie uma **tabela de rotas privada** e associe-a às sub-redes privadas.
-   - Adicione uma rota com o destino **0.0.0.0/0**, apontando para o **NAT Gateway**, permitindo que as instâncias privadas acessem a internet indiretamente.
+### **Configuração de Rotas para Sub-redes Privadas**:
+Criei uma **tabela de rotas privada** e associei-a às sub-redes privadas.  
+Adicionei uma rota com o destino **0.0.0.0/0**, apontando para o **NAT Gateway**, permitindo que as instâncias privadas acessassem a internet indiretamente.  
 
 ---
 
@@ -115,48 +119,98 @@ Como a arquitetura solicitada exige a criação de sub-redes públicas e privada
 ![Minha Imagem](./img/vpc%20atual.png)
 
 
-# Configuração de Grupos de Segurança para Instâncias EC2, Load Balancer e RDS
+# 3. Configuração de Grupos de Segurança para Instâncias EC2, Load Balancer e RDS
 Para a criação dos grupos de segurança, pesquisei "Security Groups" na barra de pesquisa da AWS e clique em Create Security Group. Associe a VPC criada e atribui os nomes aos grupos conforme as configurações abaixo:
 
-**Grupo de Segurança: ec2-security-group**
 
-Regras de Entrada ( outbound ):
+## Grupo de Segurança: ec2-security-group 💻
 
-  - Tipo: HTTP | Porta: 80 | Origem: lb-security-group ( LoadBalancer )
-  - Tipo: HTTPS| Porta: 80 | Origem: lb-security-group ( LoadBalancer )
+### Regras de Entrada (Outbound):
 
-Regras de Saída ( inbound ):
+- **Tipo**: HTTP | **Porta**: 80 | **Origem**: `lb-security-group` (Grupo de Segurança do Load Balancer)  
+  Permite que o tráfego HTTP seja direcionado para as instâncias EC2 a partir do Load Balancer.
+  
+### Regras de Saída (Inbound):
 
-  - Tipo: MySQL/Aurora | Porta: 3306 | Origem: rds-security-group ( Grupo do RDS)
-  - Tipo: All trafic : padrão
+- **Tipo**: MySQL/Aurora | **Porta**: 3306 | **Origem**: `rds-security-group` (Grupo de Segurança do RDS)  
+  Permite que as instâncias EC2 se comuniquem com o banco de dados RDS, utilizando a porta padrão do MySQL/Aurora.
 
-**Grupo de Segurança LoadBalancer: lb-security-group**
+- **Tipo**: Todos os tipos de tráfego | **Porta**: Todos | **Destino**: `0.0.0.0/0`  
+  Permite que as instâncias EC2 se comuniquem com qualquer destino na internet.
 
-Regras de Entrada ( outbound ):
-  - Tipo: HTTP | Porta: 80 | Origem: 0.0.0.0/0
+---
 
-Regras de Saída ( inbound ):
-  - Tipo: HTTP | Porta: 80 | Destino: ec2-security-group (grupo de segurança das instâncias EC2) 
+## Grupo de Segurança do Load Balancer: lb-security-group 🛠️
 
-**Grupo de segurança rds: rds-security-group**
+### Regras de Entrada (Outbound):
 
-Regras de Entrada ( outbound ):
-  - Tipo: MySQL/Aurora | Porta: 3306 | Origem: ec2-security-group (grupo de segurança das instâncias EC2)
+- **Tipo**: HTTP | **Porta**: 80 | **Origem**: `0.0.0.0/0`  
+  Permite que o tráfego HTTP de qualquer origem seja direcionado para o Load Balancer. Usado para acessar sua aplicação publicamente via HTTP.
 
-Regras de Saída( inbound ):
-  - Tipo: Todos os tipos de tráfego | Porta: Todos | Destino: 0.0.0.0/0 
+
+### Regras de Saída (Inbound):
+
+- **Tipo**: HTTP | **Porta**: 80 | **Destino**: `ec2-security-group` (Grupo de Segurança das Instâncias EC2)  
+  O Load Balancer pode se comunicar com as instâncias EC2 através de tráfego HTTP na porta 80 para direcionar as requisições para as instâncias apropriadas.
+
+---
+
+## Grupo de Segurança RDS: rds-security-group 💾
+
+### Regras de Entrada (Outbound):
+
+- **Tipo**: MySQL/Aurora | **Porta**: 3306 | **Origem**: `ec2-security-group` (Grupo de Segurança das Instâncias EC2)  
+  Permite que o banco de dados RDS receba tráfego proveniente das instâncias EC2 para comunicação com o banco de dados.
+
+### Regras de Saída (Inbound):
+
+- **Tipo**: Todos os tipos de tráfego | **Porta**: Todos | **Destino**: `0.0.0.0/0`  
+  Permite que o banco de dados RDS envie tráfego para qualquer destino na internet.
+
+
+
+**O que são Grupos de Segurança e para que servem?**
+
+Grupos de segurança são uma camada de segurança virtual que controla o tráfego de rede para instâncias em uma nuvem, como a AWS. Eles atuam como um firewall, permitindo ou bloqueando o tráfego de entrada (inbound) e de saída (outbound) com base em regras definidas pelo administrador.
+Esses grupos são usados para proteger as instâncias de máquinas virtuais (EC2), balanceadores de carga (ELB) e bancos de dados (RDS) de acessos não autorizados, permitindo um controle mais granular do tráfego de rede.
+
+![Minha Imagem](./img/grupo.png)
 
 ---
 
 
-# 3. **Criação do RDS (Banco de Dados)**
+# 4 **Criação do RDS (Banco de Dados)**
 
-Para este projeto, Pesquisei RDS na barra de pesquisa, cliquei em "DB Instances" e, em seguida, em "Create database". Iniciei as configurações para criação, escolhi o MySQL conforme o projeto, associei o RDS à VPC criada e atribuí o respectivo grupo de segurança. Em Additional configuration, defini um nome para o banco de dados e finalizei a criação, utilizando a classe db.t3.micro.
+### Processo de Criação do RDS
+
+1. **Pesquisa e Acesso ao RDS**
+   - Pesquisei "RDS" na barra de pesquisa da AWS.
+   - Selecionei "DB Instances" para visualizar as instâncias de banco de dados existentes.
+
+2. **Criação da Instância de Banco de Dados**
+   - Cliquei em "Create database" para iniciar a criação de uma nova instância de banco de dados.
+
+3. **Configuração do Banco de Dados**
+   - Escolhi o **MySQL** como o motor de banco de dados, conforme especificado no projeto.
+   - Associei o **RDS** à VPC criada anteriormente para garantir que o banco de dados estivesse na rede correta.
+
+4. **Configuração do Grupo de Segurança**
+   - Atribuí o grupo de segurança adequado ao RDS, garantindo que o tráfego de rede fosse controlado corretamente.
+
+5. **Configuração Adicional**
+   - Em **Additional configuration**, defini um nome para o banco de dados, facilitando a identificação.
+
+6. **Finalização da Criação**
+   - Selecionei a classe `db.t3.micro`, uma opção adequada para o ambiente de desenvolvimento, e finalizei o processo de criação.
+
+
 
 ![Minha Imagem](./img/rds.png)
+
+
 ---
 
-# 4. **Configuração do EFS (Elastic File System)**
+# 5. **Configuração do EFS (Elastic File System)**
  Foi utilizado o efs nesse projeto O EFS que é um sistema de arquivos escalável e totalmente gerenciado para uso com serviços da AWS e instâncias EC2. Ele permite a criação de um sistema de arquivos compartilhado, acessível por várias instâncias EC2 simultaneamente, oferecendo alta disponibilidade e escalabilidade automática.
 
  Na barra de pesquisa procurei por EFS e cliquei Create file system. 
@@ -168,7 +222,11 @@ Para este projeto, Pesquisei RDS na barra de pesquisa, cliquei em "DB Instances"
 Para anexar o EFS, aperte Attach que ira abrir essas configurações, para a motnagem na instancia foi  escolhido a opção NFS Client
 
 ![Minha Imagem](./img/efs-attach.png)
-# 5. **Configuração da Instância EC2**
+
+**O Amazon EFS (Elastic File System) é um serviço de armazenamento de arquivos da AWS que permite salvar e acessar arquivos de forma fácil na nuvem. Ele funciona como um disco rígido virtual, mas é mais flexível, já que você pode acessar os arquivos de vários servidores ao mesmo tempo. O EFS cresce automaticamente conforme você precisa de mais espaço e é muito útil para armazenar dados de aplicativos ou compartilhar arquivos entre diferentes servidores na AWS.**
+
+
+# 6. **Configuração da Instância EC2**
 
 A instância EC2 é um dos serviços fundamentais do projeto da AWS e será utilizada para hospedar o WordPress atráves do user_data.sh, que constitui a base principal deste projeto. Para configurar a instância que irá rodar o WordPress, o primeiro passo é acessar o painel do EC2 e clicar em Launch Instances.
 
@@ -250,9 +308,9 @@ docker compose -f /projeto/docker-compose.yml up
 
 ```
 
-O script já inclui explicações detalhadas sobre o que cada comando faz, facilitando o entendimento e a execução das etapas.
+### O script já inclui explicações detalhadas sobre o que cada comando faz, facilitando o entendimento e a execução das etapas. 📝
 
-# 6. **Configuração do Load Balancer (AWS)**
+# 7. **Configuração do Load Balancer (AWS)**
 
 Com a aplicação WordPress em funcionamento e devidamente integrada ao RDS e EFS, o próximo passo é configurar um Load Balancer para assegurar alta disponibilidade e balanceamento de carga. Para atender a essas necessidades, foi escolhido o Classic Load Balancer para o projeto.
 Segue abaixo as configurações da criação:
@@ -298,9 +356,9 @@ Segue abaixo as configurações da criação:
 - **Health Check**: Path `/wp-admin/install.php` na porta 80
 
 
-![Minha Imagem](./img/laodbalancer.png)
+![Minha Imagem](./img/loadbalcner%20criado.png)
 
-# 7. **Auto Scaling Group**
+# 8. **Auto Scaling Group**
 Após a configuração do Load Balancer, o próximo passo é associá-lo a um Auto Scaling Group para garantir escalabilidade automática da aplicação.
 
 as etapas para criar e configurar o Auto Scaling Group, que garantirá a escalabilidade automática da aplicação WordPress.
@@ -340,17 +398,68 @@ Após configurar o Auto Scaling Group, aguarde alguns minutos até que as instâ
 
 Após esse período, acessei o **Load Balancer** novamente e verifiquei as instâncias que foram adicionadas automaticamente pelo Auto Scaling Group.
 
-![Minha Imagem]()
+![Minha Imagem](./img/loadbalcner%20finla.png)
 
-## Bônus: Configuração do Bastion Host
+![Minha Imagem](./img/integridade.png)
+# 9. Bônus: Configuração do Bastion Host
 
 Se desejar acessar as instâncias criadas de forma segura, você pode configurar um **Bastion Host**. O Bastion Host funciona como uma ponte para acessar suas instâncias privadas em uma VPC. 
 
-### Passos para Configurar o Bastion Host:
-1. Crie uma nova instância EC2 configurada com uma chave SSH e conecte-a à sub-rede pública da sua VPC.
-2. Atribua um **Elastic IP** ao Bastion Host para que ele tenha um endereço IP público fixo.
-3. Configure regras de segurança no **Security Group** do Bastion Host, permitindo acesso SSH (porta 22) apenas do seu endereço IP.
-4. No **Security Group** das instâncias privadas, permita acesso SSH apenas a partir do Bastion Host.
-5. Conecte-se ao Bastion Host via SSH e, de lá, acesse as instâncias privadas.
+### Passos para Configurar o Bastion Host
 
-Essa configuração aumenta a segurança, pois reduz o acesso direto às instâncias EC2 privadas, permitindo acesso apenas através do Bastion Host. Veja a imagem abaixo:
+1. **Criação da Instância EC2:**
+   - Crie uma nova instância EC2 configurada com uma chave SSH e conecte-a à sub-rede pública da  VPC.
+   
+2. **Atribuição de Elastic IP:**
+   - Atribua um **Elastic IP** ao Bastion Host, garantindo um endereço IP público fixo.
+
+3. **Configuração de Regras de Segurança:**
+   - No **Security Group** do Bastion Host, permita o acesso SSH (porta 22) apenas a partir do seu endereço IP.
+
+4. **Configuração do Security Group da Instância Privada:**
+   - No **Security Group** das instâncias privadas, permita o acesso SSH apenas a partir do Bastion Host.
+
+### Configuração no WSL com Ubuntu
+
+O procedimento que eu segui funcionou corretamente no meu **WSL** com **Ubuntu** instalado. Para que as duas instâncias possam se conectar, ambas precisam da mesma chave SSH. Para isso, criei um arquivo de configuração da chave utilizando o seguinte comando:
+
+```bash
+sudo nano ~/.ssh/config
+```
+
+Logo em seguida apliquei o seguinte scritp :
+
+
+![Minha Imagem](./img/bastion.png)
+
+### Explicação:
+
+- **Host bastion**: Define a configuração para a instância Bastion, onde `<IP PUBLICO>` é o IP público da instância Bastion.
+  
+- **Host private-ec2**: Define a configuração para a instância privada EC2, onde `<IP PRIVADO>` é o IP privado da instância EC2.
+  
+- **ProxyJump bastion**: Isso garante que a conexão SSH à instância privada passe primeiro pela instância Bastion, agindo como um "proxy" para a conexão.
+
+- **IdentityFile**: A chave privada utilizada para autenticar as conexões. Essa chave deve ser a mesma que foi utilizada na criação das instâncias EC2 e no Bastion Host, garantindo que a autenticação seja feita de forma segura.
+
+Depois apliquei o comando:
+
+```bash
+ssh private-ec2
+```
+Dessa forma, consegui acessar minha instância privada de maneira segura e prática, utilizando o Bastion Host como intermediário para garantir uma conexão protegida e eficiente.
+
+## Projeto Finalizado e Considerações de Aprendizado 
+
+### Projeto Finalizado 🚀
+
+Neste projeto, aprendir a implementar uma  aplicação simples em WordPress utilizando Docker, com a infraestrutura hospedada na AWS.
+### Considerações de Aprendizado 📚
+
+- **Grupos de Segurança**: Entendi melhor como funcionam os grupos de segurança na AWS, que controlam o tráfego de rede e protegem as instâncias da aplicação. 🔐
+- **Instâncias EC2**: Aprendi sobre as instâncias EC2 e como elas funcionam como servidores virtuais para rodar minha aplicação na AWS. 💻
+- **Load Balancer**: Compreendi o papel do balanceador de carga (Load Balancer) em distribuir o tráfego de rede entre várias instâncias, garantindo alta disponibilidade e escalabilidade. ⚖️
+- **Auto Scaling**: Aprendi como o Auto Scaling ajusta automaticamente a quantidade de instâncias para se adaptar à demanda de tráfego, garantindo que minha aplicação seja sempre eficiente. 📈
+
+Esse projeto me ajudou a consolidar meus conhecimentos em infraestrutura como código e deploy de aplicações na nuvem. 🌐
+
