@@ -50,7 +50,7 @@ em seguida para rodar o script localmente:
 
 O script utilizado encontra-se abaixo, mas, para ser utilizado no user_data.sh, algumas modificações foram feitas ao decorrer do processo, conforme necessário.
 
-[aqui](scripts/testelocal.sh).
+[O script usado para teste encontra-se aqui.](scripts/testelocal.sh).
 
 Aqui podemos ver rodando localmente :
 
