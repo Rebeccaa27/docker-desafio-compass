@@ -493,8 +493,6 @@ Abaixo, o WordPress funcionando perfeitamente:
 
 ![Minha Imagem](./img/wordpress.png)
 
-![Minha Imagem](./img/wordpress.png)
-
 
 ## Projeto Finalizado e Considerações de Aprendizado 
 
