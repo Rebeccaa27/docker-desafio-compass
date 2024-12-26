@@ -54,7 +54,6 @@ O script utilizado encontra-se abaixo, mas, para ser utilizado no user_data.sh, 
 
 Aqui podemos ver rodando localmente :
 
-
 ![Minha Imagem](./img/Captura%20de%20tela%202024-12-23%20172724.png)
 
 
@@ -282,9 +281,11 @@ sudo apt install nfs-common -y
 # cria diretórios necessários para a montagem
 sudo mkdir -p /mnt/efs
 
+# Monta o sistema de arquivos EFS no diretório /mnt/efs 
 sudo mount -t nfs4 -o nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,noresvport fs-067b7b6f67dfe8d8d.efs.us-east-1.amazonaws.com:/ /mnt/efs 
 
-sudo mkdir -p /projeto  
+# Cria o diretório /projeto
+sudo mkdir -p /projeto
 
 # Criação do arquivo docker-compose.yml
 cat <<EOF > /projeto/docker-compose.yml
@@ -317,15 +318,29 @@ ExecStart=/usr/bin/docker compose -f /projeto/docker-compose.yml up
 WantedBy=multi-user.target
 EOF
 
+# Habilita o serviço wordpress-container para iniciar automaticamente na inicialização do sistema
 sudo systemctl enable wordpress-container.service
 
-
+# Inicia o serviço wordpress-container imediatamente
 sudo systemctl start wordpress-container.service
 
 ```
 A criação do serviço do systemd no script é essencial para garantir que o container do WordPress seja iniciado automaticamente após reinicializações do sistema. Com isso, mesmo que a instância seja reiniciada, a aplicação continuará funcionando normalmente. O serviço assegura que o Docker esteja pronto antes de iniciar o container e garante que o WordPress seja reiniciado automaticamente em caso de falhas, mantendo a disponibilidade da aplicação sem a necessidade de intervenção manual.
 
 ### O script já inclui explicações detalhadas sobre o que cada comando faz, facilitando o entendimento e a execução das etapas. 📝
+
+# Criação do launch template
+
+Em Ec2 clique na instância que deseja lançar para o modelo e faça como a imagem:
+
+
+![Minha Imagem](./img/lanch%20template.s;pn.png)
+
+Logo apos dar o Launch template name para o tamplate, e seguir com as configurações, não selecionar a VPC, mas deixei com o Grupo de segurança que foi associado a EC2.
+
+Finalizar a cração:
+
+![Minha Imagem](./img/templatepronto.png)
 
 ## Bônus: Configuração do Bastion Host
 **Se você precisar acessar instâncias privadas para realizar modificações ou solucionar problemas, pode configurar um Bastion Host.**
@@ -460,6 +475,8 @@ as etapas para criar e configurar o Auto Scaling Group, que garantirá a escalab
 
 ![Minha Imagem](./img/autscaling.png)
 
+
+
 ## Etapas Finais
 
 Clique em "Próximo" até chegar à página final para **criar o Auto Scaling Group**. Não é necessário marcar outras opções.
@@ -475,6 +492,10 @@ Após esse período, acessei o **Load Balancer** novamente e verifiquei as inst�
 Abaixo, o WordPress funcionando perfeitamente:
 
 ![Minha Imagem](./img/wordpress.png)
+
+![Minha Imagem](./img/wordpress.png)
+
+
 ## Projeto Finalizado e Considerações de Aprendizado 
 
 ### Projeto Finalizado 🚀
