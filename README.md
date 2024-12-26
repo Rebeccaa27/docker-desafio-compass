@@ -33,9 +33,9 @@ Abaixo está a estrutura do projeto a partir de uma imagem:
 
 ---
 
-# 1. Teste local com script #
+# 1. Teste local com script e Docker compose #
 
-Antes de iniciar a implementação completa na AWS, realizei testes na minha máquina local utilizando o WSL com o Ubuntu instalado, a fim de entender como o script user_data.sh funcionaria.
+Antes de iniciar a implementação completa na AWS, realizei testes na minha máquina localmente utilizando o WSL com o Ubuntu instalado, a fim de entender como o script user_data.sh funcionaria.
 
 Criei um arquivo chamado testelocal.sh, onde inseri os comandos necessários para a instalação do Docker, além de configurar um ambiente com o WordPress e o MariaDB utilizando Docker Compose. O script automatiza a instalação do Docker, a criação de volumes persistentes e a configuração dos containers para o WordPress e o MariaDB. Esse teste local permitiu simular a configuração completa antes de aplicá-la na AWS, garantindo que o ambiente estivesse pronto para a execução.
 
@@ -325,8 +325,57 @@ sudo systemctl start wordpress-container.service
 ```
 A criação do serviço do systemd no script é essencial para garantir que o container do WordPress seja iniciado automaticamente após reinicializações do sistema. Com isso, mesmo que a instância seja reiniciada, a aplicação continuará funcionando normalmente. O serviço assegura que o Docker esteja pronto antes de iniciar o container e garante que o WordPress seja reiniciado automaticamente em caso de falhas, mantendo a disponibilidade da aplicação sem a necessidade de intervenção manual.
 
-
 ### O script já inclui explicações detalhadas sobre o que cada comando faz, facilitando o entendimento e a execução das etapas. 📝
+
+## Bônus: Configuração do Bastion Host
+**Se você precisar acessar instâncias privadas para realizar modificações ou solucionar problemas, pode configurar um Bastion Host.**
+
+O Bastion Host é uma instância segura que funciona como uma porta de entrada para acessar instâncias dentro de uma VPC. Ele é utilizado para acessar instâncias privadas, que não estão diretamente expostas à internet, de forma controlada e segura. O Bastion Host fica acessível à internet e, a partir dele, que conseguimos nos conectar às instâncias privadas por meio de protocolos como SSH. 
+
+### Passos para Configurar o Bastion Host
+
+1. **Criação da Instância EC2:**
+   - Crie uma nova instância EC2 configurada com uma chave SSH e conecte-a à sub-rede pública da  VPC.
+   
+2. **Atribuição de Elastic IP:**
+   - Atribua um **Elastic IP** ao Bastion Host, garantindo um endereço IP público fixo.
+
+3. **Configuração de Regras de Segurança:**
+   - Recomendo criar um grupo de segurança a parte para ele, mas dentro da mesma VPC.
+   - No **Security Group** do Bastion Host, permita o acesso SSH (porta 22) apenas a partir do seu endereço IP.
+
+4. **Configuração do Security Group da Instância Privada:**
+   - No **Security Group** das instâncias privadas, permita o acesso SSH apenas a partir do Bastion Host.
+
+### Configuração no WSL com Ubuntu
+
+O procedimento que eu segui funcionou corretamente no meu **WSL** com **Ubuntu** instalado. Para que as duas instâncias possam se conectar, ambas precisam da mesma chave SSH. Para isso, criei um arquivo de configuração da chave utilizando o seguinte comando:
+
+```bash
+sudo nano ~/.ssh/config
+```
+
+Logo em seguida apliquei o seguinte scritp :
+
+
+![Minha Imagem](./img/bastion.png)
+
+### Explicação:
+
+- **Host bastion**: Define a configuração para a instância Bastion, onde `<IP PUBLICO>` é o IP público da instância Bastion.
+  
+- **Host private-ec2**: Define a configuração para a instância privada EC2, onde `<IP PRIVADO>` é o IP privado da instância EC2.
+  
+- **ProxyJump bastion**: Isso garante que a conexão SSH à instância privada passe primeiro pela instância Bastion, agindo como um "proxy" para a conexão.
+
+- **IdentityFile**: A chave privada utilizada para autenticar as conexões. Essa chave deve ser a mesma que foi utilizada na criação das instâncias EC2 e no Bastion Host, garantindo que a autenticação seja feita de forma segura.
+
+Depois apliquei o comando:
+
+```bash
+ssh private-ec2
+```
+Dessa forma, consegui acessar minha instância privada de maneira segura e prática, utilizando o Bastion Host como intermediário para garantir uma conexão protegida e eficiente.
 
 # 7. **Configuração do Load Balancer (AWS)**
 
@@ -422,56 +471,10 @@ Após esse período, acessei o **Load Balancer** novamente e verifiquei as inst�
 ![Minha Imagem](./img/loadbalcner%20finla.png)
 
 ![Minha Imagem](./img/integridade.png)
-# 9. Bônus: Configuração do Bastion Host
-**Se você precisar acessar instâncias privadas para realizar modificações ou solucionar problemas, pode configurar um Bastion Host.**
 
-O Bastion Host é uma instância segura que funciona como uma porta de entrada para acessar instâncias dentro de uma VPC. Ele é utilizado para acessar instâncias privadas, que não estão diretamente expostas à internet, de forma controlada e segura. O Bastion Host fica acessível à internet e, a partir dele, que conseguimos nos conectar às instâncias privadas por meio de protocolos como SSH. 
+Abaixo, o WordPress funcionando perfeitamente:
 
-### Passos para Configurar o Bastion Host
-
-1. **Criação da Instância EC2:**
-   - Crie uma nova instância EC2 configurada com uma chave SSH e conecte-a à sub-rede pública da  VPC.
-   
-2. **Atribuição de Elastic IP:**
-   - Atribua um **Elastic IP** ao Bastion Host, garantindo um endereço IP público fixo.
-
-3. **Configuração de Regras de Segurança:**
-   - Recomendo criar um grupo de segurança a parte para ele, mas dentro da mesma VPC.
-   - No **Security Group** do Bastion Host, permita o acesso SSH (porta 22) apenas a partir do seu endereço IP.
-
-4. **Configuração do Security Group da Instância Privada:**
-   - No **Security Group** das instâncias privadas, permita o acesso SSH apenas a partir do Bastion Host.
-
-### Configuração no WSL com Ubuntu
-
-O procedimento que eu segui funcionou corretamente no meu **WSL** com **Ubuntu** instalado. Para que as duas instâncias possam se conectar, ambas precisam da mesma chave SSH. Para isso, criei um arquivo de configuração da chave utilizando o seguinte comando:
-
-```bash
-sudo nano ~/.ssh/config
-```
-
-Logo em seguida apliquei o seguinte scritp :
-
-
-![Minha Imagem](./img/bastion.png)
-
-### Explicação:
-
-- **Host bastion**: Define a configuração para a instância Bastion, onde `<IP PUBLICO>` é o IP público da instância Bastion.
-  
-- **Host private-ec2**: Define a configuração para a instância privada EC2, onde `<IP PRIVADO>` é o IP privado da instância EC2.
-  
-- **ProxyJump bastion**: Isso garante que a conexão SSH à instância privada passe primeiro pela instância Bastion, agindo como um "proxy" para a conexão.
-
-- **IdentityFile**: A chave privada utilizada para autenticar as conexões. Essa chave deve ser a mesma que foi utilizada na criação das instâncias EC2 e no Bastion Host, garantindo que a autenticação seja feita de forma segura.
-
-Depois apliquei o comando:
-
-```bash
-ssh private-ec2
-```
-Dessa forma, consegui acessar minha instância privada de maneira segura e prática, utilizando o Bastion Host como intermediário para garantir uma conexão protegida e eficiente.
-
+![Minha Imagem](./img/wordpress.png)
 ## Projeto Finalizado e Considerações de Aprendizado 
 
 ### Projeto Finalizado 🚀
