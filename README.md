@@ -464,7 +464,7 @@ as etapas para criar e configurar o Auto Scaling Group, que garantirá a escalab
 
 - **Balanceamento de carga**: Anexe a um load balancer existente. Selecione o load balancer previamente criado.
 
-## Etapa 4: Configuração do Cluster
+## Etapa 4: Configuração 
 
 - **Tamanho do grupo**:
   - **Capacidade desejada**: 2 instâncias
