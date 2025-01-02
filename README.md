@@ -297,10 +297,10 @@ services:
     ports:
       - 80:80
     environment:
-      WORDPRESS_DB_HOST: projectwordpress-banco.clsai62gqnrn.us-east-1.rds.amazonaws.com
-      WORDPRESS_DB_USER: admin
-      WORDPRESS_DB_PASSWORD: Senha123456
-      WORDPRESS_DB_NAME: wordpressprojeto
+      WORDPRESS_DB_HOST: <ENDPOINT>
+      WORDPRESS_DB_USER: <USER>
+      WORDPRESS_DB_PASSWORD: <PASSWORD>
+      WORDPRESS_DB_NAME: <NAMEDATABASE>
     volumes:
       - /mnt/efs:/var/www/html
 EOF
@@ -313,11 +313,16 @@ After=docker.service
 Requires=docker.service
 
 [Service]
+User=ubuntu
+Group=docker
+WorkingDirectory=/projeto
 ExecStart=/usr/bin/docker compose -f /projeto/docker-compose.yml up
 
 [Install]
 WantedBy=multi-user.target
 EOF
+
+sudo systemctl daemon-reload
 
 # Habilita o serviço wordpress-container para iniciar automaticamente na inicialização do sistema
 sudo systemctl enable wordpress-container.service
